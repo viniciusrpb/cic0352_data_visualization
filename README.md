@@ -6,7 +6,7 @@ Material didático de apoio para a disciplina CIC0352 - Visualização de Dados,
 
 
 
-## Prefácio
+## Sumário
 
 1. Introdução à Visualização de Dados
 2. Perceção Humana
