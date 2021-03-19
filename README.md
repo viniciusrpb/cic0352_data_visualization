@@ -19,6 +19,9 @@ Material didático de apoio para a disciplina CIC0352 - Visualização de Dados,
    
 5. Fundamentos de Aprendizado de Máquina
    
-      5.2 [Fundamentos de Textos](cap5_intro_ml_classificacao.ipynb)
+      5.2. [Classificação de dados](cap5_intro_ml_classificacao.ipynb)
+      
+      5.3. [Agrupamento de dados](cap5_intro_ml_classificacao.ipynb)
+      
 6. Técnicas de Visualização Clássicas
 
