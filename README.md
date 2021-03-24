@@ -24,4 +24,8 @@ Material didático de apoio para a disciplina CIC0352 - Visualização de Dados,
       5.3. [Agrupamento de dados](cap5_intro_ml_classificacao.ipynb)
       
 6. Técnicas de Visualização Clássicas
+     
+      6.1. [Visualização de Dados Multivariados](cap6_visualizacoes_classicas.ipynb)
+      
+      6.2. WordCloud
 
