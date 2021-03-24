@@ -2,7 +2,7 @@
 
 ## Visualizar ou Fazer Download
 
-Clique [**aqui**](autompg/auto-mpg.csv) para acessar o arquivo do conjunto Auto-MPG Cars.
+Clique [**aqui**](auto-mpg.csv) para acessar o arquivo do conjunto Auto-MPG Cars.
 
 ## Fonte
 
