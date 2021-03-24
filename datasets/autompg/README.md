@@ -1,5 +1,9 @@
 # Auto-MPG Cars
 
+## Visualizar ou Fazer Download
+
+Clique [**aqui**](autompg/auto-mpg.csv) para acessar o arquivo do conjunto Auto-MPG Cars.
+
 ## Fonte
 
 https://archive.ics.uci.edu/ml/datasets/Auto+MPG
