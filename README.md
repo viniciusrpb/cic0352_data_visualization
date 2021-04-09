@@ -28,4 +28,10 @@ Material didático de apoio para a disciplina CIC0352 - Visualização de Dados,
       6.1. [Técnicas Clássicas/Básicas de Visualização](cap6_visualizacoes_classicas.ipynb)
       
       6.2. WordCloud
+      
+7. Visualização baseadas em Projeções Multi-dimensionais
+     
+      7.1. [Force Scheme](cap7_projecoes_multidimensionais.ipynb)
+      
+      7.2. [Projeções Multi-dimensionais](cap7_projecoes_multidimensionais.ipynb)
 
