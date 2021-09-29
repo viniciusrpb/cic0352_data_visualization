@@ -1,0 +1,278 @@
+---
+title: "Visualização de Dados"
+output:
+  html_document:
+    df_print: paged
+knit: (function(input_file, encoding) { out_dir <- 'docs'; rmarkdown::render(input_file,
+  encoding=encoding, output_file=file.path(dirname(input_file), out_dir, 'visualizacao.html'))})
+---
+
+
+## Datasets
+
+```{r}
+library(plotly)
+library(datasets)
+```
+
+```{r}
+nrow(mpg)
+ncol(mpg)
+```
+
+## Gráfico de Linhas
+
+```{r}
+library(plotly)
+
+trace_0 <- rnorm(100, mean = 5)
+trace_1 <- rnorm(100, mean = 0)
+trace_2 <- rnorm(100, mean = -5)
+x <- c(1:100)
+
+data <- data.frame(x, trace_0, trace_1, trace_2)
+
+fig <- plot_ly(data, x = ~x)
+fig <- fig %>% add_trace(y = ~trace_0, name = 'Padrão 1',mode = 'lines')
+fig <- fig %>% add_trace(y = ~trace_1, name = 'Padrão 2', mode = 'lines+markers')
+fig <- fig %>% add_trace(y = ~trace_2, name = 'Padrão 3', mode = 'markers')
+
+fig
+```
+
+
+
+## Gráfico de Barras
+
+Segue um gráfico de barras
+```{r}
+fig = plot_ly(data = mpg, x = ~model, y = ~year, type = 'bar')
+
+fig
+```
+
+Filtrando instancias
+
+```{r}
+str(mpg)
+```
+Contando os valores do atributo "manufacturer" e pegando esses valores:
+
+```{r}
+counts = table(mpg$manufacturer)
+
+values = unique(mpg$manufacturer)
+```
+
+Nosso primeiro histograma:
+
+```{r}
+fig = plot_ly(x = values, y = counts, type = 'bar',name=values)
+fig = fig %>% layout(xaxis = list(title = 'Modelo'), yaxis = list(title = 'Ano'))
+fig
+```
+
+Podemos testar também o gráfico de barras empilhado:
+
+```{r}
+
+counts = table(mpg$manufacturer)
+
+fig <- plot_ly(data = mpg, x = ~model, y = ~year, type = 'bar')
+#fig <- fig %>% layout(yaxis = list(title = 'Count'), barmode = 'stack')
+
+fig
+```
+
+Vamos comparar agora apenas os carros das fabricantes Toyota e Volkswagen
+
+```{r}
+toyota = mpg[mpg$manufacturer == 'toyota',]
+volks = mpg[mpg$manufacturer == 'volkswagen',]
+```
+
+Como fica a Toyota:
+
+```{r}
+toyota
+```
+
+Como fica Volkswagen:
+
+```{r}
+volks
+```
+
+
+## Gráfico de Pizza
+
+```{r}
+
+fig <- plot_ly(data = volks, labels = volks$year, x=volks$year, type = 'pie')
+
+fig
+```
+
+## Gráfico de Pizza
+
+```{r}
+
+fig <- plot_ly(data = toyota, labels = toyota$class, x= toyota$class, type = 'pie')
+
+fig
+```
+
+## Box Plot
+
+```{r}
+fig <- plot_ly(y=volks$displ, type = "box", name="Prices Volkswagen")
+fig <- fig %>% add_trace(y=toyota$displ, name="Prices Toyota")
+
+
+fig
+```
+
+```{r}
+summary(volks$displ)
+```
+
+```{r}
+fig <- plot_ly(y=volks$displ, type = "box", boxpoints = "all", name="Prices Volkswagen")
+fig <- fig %>% add_trace(y=toyota$displ, name="Prices Toyota")
+
+
+fig
+```
+
+## Gráfico de Dispersão
+
+```{r}
+fig = plot_ly(data = iris, x = ~Sepal.Length, y = ~Petal.Length)
+
+fig
+```
+
+```{r}
+library(plotly)
+
+pal = c("red", "blue", "green")
+pal = setNames(pal, c("virginica", "setosa", "versicolor"))
+
+fig = plot_ly(data = iris, x = ~Sepal.Length, y = ~Petal.Length, color = ~Species, colors = pal)
+
+fig
+```
+
+## Matrizes de gráficos de dispersão
+
+```{r}
+
+axis = list(showline=FALSE,
+            zeroline=FALSE,
+            gridcolor='#ffff',
+            ticklen=4,
+            titlefont=list(size=13))
+
+fig <- iris %>%
+  plot_ly()
+fig <- fig %>%
+  add_trace(
+    type = 'splom',
+    dimensions = list(
+      list(label='sepal length', values=~Sepal.Length),
+      list(label='sepal width', values=~Sepal.Width),
+      list(label='petal length', values=~Petal.Length),
+      list(label='petal width', values=~Petal.Width)
+    ),
+    color = ~Species, colors = c('#636EFA','#EF553B','#00CC96') ,
+    marker = list(
+      size = 7,
+      line = list(
+        width = 1,
+        color = 'rgb(230,230,230)'
+      )
+    )
+  )
+fig <-  fig %>% style(diagonal = list(visible = FALSE))
+fig <- fig %>%
+  layout(
+    hovermode='closest',
+    dragmode= 'select',
+    plot_bgcolor='rgba(240,240,240, 0.95)',
+    xaxis=list(domain=NULL, showline=F, zeroline=F, gridcolor='#ffff', ticklen=4),
+    yaxis=list(domain=NULL, showline=F, zeroline=F, gridcolor='#ffff', ticklen=4),
+    xaxis2=axis,
+    xaxis3=axis,
+    xaxis4=axis,
+    yaxis2=axis,
+    yaxis3=axis,
+    yaxis4=axis
+  )
+
+fig
+```
+Podemos utilizar a análise das componentes principais (PCA) para alterar a representação dos dados originais:
+
+
+Um bom tutorial sobre PCA pode ser encontrado neste [link](https://operdata.com.br/blog/analise-de-componentes-principais/)
+
+Variância acumulada das componentes principais:
+
+```{r}
+pca = prcomp(iris[,1:4])
+summary(pca)
+```
+
+Modificando a base de dados:
+
+```{r}
+library(plotly)
+library(stats)
+data(iris)
+X <- subset(iris, select = -c(Species))
+prin_comp <- prcomp(X, rank. = 2)
+components <- prin_comp[["x"]]
+components <- data.frame(components)
+components <- cbind(components, iris$Species)
+components$PC2 <- -components$PC2
+
+fig <- plot_ly(components, x = ~PC1, y = ~PC2, color = ~iris$Species, colors = c('#636EFA','#EF553B','#00CC96'), type = 'scatter', mode = 'markers')%>%
+  layout(
+    legend=list(title=list(text='color')),
+    plot_bgcolor='#e5ecf6',
+    xaxis = list(
+      title = "0",
+      zerolinecolor = "#ffff",
+      zerolinewidth = 2,
+      gridcolor='#ffff'),
+    yaxis = list(
+      title = "1",
+      zerolinecolor = "#ffff",
+      zerolinewidth = 2,
+      gridcolor='#ffff'))
+fig
+```
+
+
+
+```{r}
+install.packages("tsne")
+```
+Agora vamos realizar a apresentação dos dados
+
+```{r}
+library(tsne)
+
+features = subset(iris, select = -c(Species)) 
+
+set.seed(0)
+tsne <- tsne(features, initial_dims = 2)
+tsne <- data.frame(tsne)
+pdb <- cbind(tsne,iris$Species)
+fig <-  plot_ly(data = pdb ,x =  ~X1, y = ~X2, type = 'scatter', split = ~iris$Species)
+
+fig
+```
+
+não-supervisionado
+
