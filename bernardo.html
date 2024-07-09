@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gráfico de Coordenadas Paralelas</title>
+    <style>
+        .axis {
+            font: 10px sans-serif;
+        }
+        .background path {
+            fill: none;
+            stroke: #ddd;
+            shape-rendering: crispEdges;
+        }
+        .foreground path {
+            fill: none;
+            stroke: steelblue;
+        }
+        .axis text {
+            text-anchor: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="chart"></div>
+
+    <!-- Carregar o D3.js -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
