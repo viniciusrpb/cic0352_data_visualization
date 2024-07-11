@@ -1,87 +1,108 @@
-// Carregar os dados do JSON
-d3.json('dados.json').then(function(data) {
-    // Configurações do gráfico
-    const margin = { top: 50, right: 10, bottom: 10, left: 10 },
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+// Define as dimensões e margens do gráfico
+const margin = { top: 30, right: 10, bottom: 10, left: 10 },
+      width = 960 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
 
-    const x = d3.scalePoint().range([0, width]).padding(1),
-        y = {};
+// Anexe o objeto SVG ao corpo da página
+const svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    const line = d3.line(),
-        axis = d3.axisLeft();
+// Carregar os dados do arquivo JSON
+d3.json("dados.json").then(function(data) {
+    // Extrair a lista de dimensões que queremos plotar
+    const dimensions = d3.keys(data[0]);
 
-    const svg = d3.select("#chart").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    // Crie uma escala para cada dimensão
+    const y = {};
+    for (let i in dimensions) {
+        let name = dimensions[i];
+        y[name] = d3.scaleLinear()
+            .domain(d3.extent(data, d => +d[name]))
+            .range([height, 0]);
+    }
 
-    // Escala de cores para o atributo products_int
-    const color = d3.scaleOrdinal(d3.schemeCategory10)
-        .domain(data.map(d => d.products_int));
+    // Crie uma escala x
+    const x = d3.scalePoint()
+        .range([0, width])
+        .padding(1)
+        .domain(dimensions);
 
-    // Mapeamento dos nomes dos eixos
-    const axisMapping = {
-        'Cultivation (CO2Eq/Kg-1)': 'cultivation1',
-        'Cultivation Water (m3/kg-1)': 'cultivation2',
-        'Processing (CO2Eq/Kg-1)': 'processing1',
-        'Processing Water (m3/kg-1)': 'processing2',
-        'Transportation<br>(CO2Eq/Kg-1/Per Kilometer)<br>': 'transportation1',
-        'Transportation<br>Ton of Liters-1/Per Kilometer<br>': 'transportation2'
-    };
+    // Função para desenhar o caminho
+    function path(d) {
+        return d3.line()(dimensions.map(p => [x(p), y[p](d[p])]));
+    }
 
-    // Inverter o mapeamento para facilitar o uso
-    const inverseAxisMapping = Object.keys(axisMapping).reduce((acc, key) => {
-        acc[axisMapping[key]] = key;
-        return acc;
-    }, {});
-
-    // Extrair as dimensões e criar uma escala y para cada uma
-    const dimensions = Object.keys(data[0]).filter(function(d) {
-        return d != "products" && d != "products_int" && (y[d] = d3.scaleLinear()
-            .domain(d3.extent(data, function(p) { return +p[d]; }))
-            .range([height, 0]));
-    });
-
-    x.domain(dimensions);
-
-    // Adicionar as linhas de fundo para uma melhor visualização
+    // Adicionar linhas de fundo cinzas para contexto
     svg.append("g")
         .attr("class", "background")
-        .selectAll("path")
+      .selectAll("path")
         .data(data)
-        .enter().append("path")
+      .enter().append("path")
         .attr("d", path);
 
-    // Adicionar as linhas de frente para a interação
+    // Adicionar as linhas de primeiro plano
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+
     svg.append("g")
         .attr("class", "foreground")
-        .selectAll("path")
+      .selectAll("path")
         .data(data)
-        .enter().append("path")
+      .enter().append("path")
         .attr("d", path)
         .style("stroke", d => color(d.products_int));
 
-    // Adicionar um grupo de eixos para cada dimensão
+    // Adicionar um elemento de grupo para cada dimensão
     const g = svg.selectAll(".dimension")
         .data(dimensions)
-        .enter().append("g")
+      .enter().append("g")
         .attr("class", "dimension")
-        .attr("transform", function(d) { return "translate(" + x(d) + ")"; });
+        .attr("transform", d => "translate(" + x(d) + ")");
 
+    // Adicionar um eixo e título
     g.append("g")
         .attr("class", "axis")
-        .each(function(d) { d3.select(this).call(axis.scale(y[d])); })
-        .append("text")
+        .each(function(d) {
+            d3.select(this).call(d3.axisLeft(y[d]));
+        })
+      .append("text")
         .style("text-anchor", "middle")
-        .attr("y", -20)
-        .text(function(d) { return inverseAxisMapping[d]; })
-        .style("font-size", "12px")
-        .style("fill", "black");
+        .attr("y", -9)
+        .text(d => d);
 
-    // Função para desenhar as linhas
-    function path(d) {
-        return line(dimensions.map(function(p) { return [x(p), y[p](d[p])]; }));
+    // Permitir brushing
+    g.append("g")
+        .attr("class", "brush")
+        .each(function(d) {
+            d3.select(this).call(d3.brushY()
+                .extent([[-10,0], [10,height]])
+                .on("start brush", brush)
+            );
+        });
+
+    // Destaque as dimensões selecionadas
+    function brush() {
+        const actives = [];
+        svg.selectAll(".brush")
+            .filter(function(d) {
+                y[d].brushSelectionValue = d3.brushSelection(this);
+                return d3.brushSelection(this);
+            })
+            .each(function(d) {
+                actives.push({
+                    dimension: d,
+                    extent: d3.brushSelection(this)
+                });
+            });
+
+        // Defina a exibição das linhas de primeiro plano
+        svg.selectAll(".foreground path").style("display", function(d) {
+            return actives.every(function(active) {
+                const dim = active.dimension;
+                return active.extent[0] <= y[dim](d[dim]) && y[dim](d[dim]) <= active.extent[1];
+            }) ? null : "none";
+        });
     }
 });
